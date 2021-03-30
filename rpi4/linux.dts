@@ -27,16 +27,16 @@
 	};
 
 	chosen {      
-        linux,initrd-end = <0x00000000 0x2e327679>;
-        linux,initrd-start = <0x00000000 0x2d700000>;
-        bootargs = "console=ttyS0,115200n8 root=/dev/ram0 nr_cpus=2 maxcpus=2 rw debug loglevel=8 pci=nomsi earlyprintk=serial";
-        linux,stdout-path = "serial0:115200n8";
-        stdout-path = "serial0:115200n8";
+        linux,initrd-end = <0x00 0x00000000 0x2d800000>;
+        linux,initrd-start = <0x00 0x00000000 0x2d700000>;
+        bootargs = "console=ttyS1,115200n8 root=/dev/ram0 nr_cpus=2 maxcpus=2 rw debug loglevel=8 pci=nomsi earlyprintk=serial";
+        linux,stdout-path = "serial1:115200n8";
+        stdout-path = "serial1:115200n8";
 	};
 	
     memory@0 {
 		device_type = "memory";
-		/* Use 256MiB as default RAM size */
+		/* Use 256MiB as default VM RAM size */
 		reg = <0x00 0x00000000 0x10000000>;
 	};
 
