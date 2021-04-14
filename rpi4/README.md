@@ -11,3 +11,24 @@
 * From: git://git.buildroot.net/buildroot
 * Commit hash: e2fba6457bd9d9c720540332eaf0c1f8c29eab00 (2021.02)
 * Config: `buildroot/buildroot-config`
+
+## Build instructions
+### Linux image
+
+For sake of clarity, we assume ${LINUX\_SOURCES} points to Linux kernel source
+tree and ${SEL4\_PROJECT} points to the project source tree.
+
+    cd ${LINUX_SOURCES}
+    mkdir build
+    cd build
+    cp ${SEL4_PROJECT}/camkes-vm-images/rpi4/linux-config .config
+    export ARCH=arm64
+    export CROSS_COMPILE=aarch64-none-linux-gnu-
+    make olddefconfig
+    make
+    cp arch/arm64/boot/Image ${SEL4_PROJECTS}/projects/camkes-vm-images/rpi4/linux
+
+In case you modified kernel config, remember to update the config in git as well:
+
+    make savedefconfig
+    cp defconfig ${SEL4_PROJECTS}/projects/camkes-vm-images/rpi4/linux-config
