@@ -1,23 +1,39 @@
+/*
+ * Copyright Linux Kernel Team
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
+ *
+ * This file is derived from an intermediate build stage of the
+ * Linux kernel. The licenses of all input files to this process
+ * are compatible with GPL-2.0-only.
+ */
+
 /dts-v1/;
 
 / {
-    compatible = "linux,dummy-virt";
-    #address-cells = < 0x02 >;
-    #size-cells = < 0x02 >;
-    interrupt-parent = <&intc>;
+
+    compatible = "raspberrypi,4-model-b\0brcm,bcm2711";
+    model = "Raspberry Pi 4 Model B";
+    #address-cells = <0x02>;
+    #size-cells = <0x01>;
+    interrupt-parent = <0x01>;
 
     memory@40000000 {
         device_type = "memory";
-        reg = <0x00 0x40000000 0x00 0x20000000>; /* 512MB */
+        reg = <0x00 0x40000000 0x20000000>; /* 512MB */
     };
 
     cpus {
-        #address-cells = < 0x01 >;
-        #size-cells = < 0x00 >;
+        #address-cells = <0x01>;
+        #size-cells = <0x00>;
+        //enable-method = "brcm,bcm2836-smp";
         cpu@0 {
-            compatible = "arm,cortex-a72";
             device_type = "cpu";
-            reg = < 0x00 >;
+            compatible = "arm,cortex-a72";
+            reg = <0x00>;
+            enable-method = "psci";
+            cpu-release-addr = <0x00 0xd8>;
+            phandle = <0x20>;
         };
     };
 
@@ -27,31 +43,71 @@
     };
 
     soc {
-        #address-cells = < 0x01 >;
-        #size-cells = < 0x01 >;
-        ranges = <0x7e000000  0x0 0xfe000000  0x01800000>,
-                 <0x7c000000  0x0 0xfc000000  0x02000000>,
-                 <0x40000000  0x0 0xff800000  0x00800000>;
+        compatible = "simple-bus";
+        #address-cells = <0x01>;
+        #size-cells = <0x01>;
+        ranges = <0x7e000000 0x00 0xfe000000 0x1800000 
+                  0x7c000000 0x00 0xfc000000 0x2000000 
+                  0x40000000 0x00 0xff800000 0x800000>;
 
-        intc: gic400@40041000 {
-            compatible = "arm,gic-400";
+        interrupt-controller@40041000 {
             interrupt-controller;
-            #interrupt-cells = < 0x03 >;
-            interrupts = < 0x01 0x09 0xf04 >;
-            #address-cells = < 0x02 >;
-            #size-cells = < 0x02 >;
-            reg = < 0x00 0x40041000 0x00 0x1000 0x00 0x40042000 0x00 0x2000
-                    0x00 0x40044000 0x00 0x2000 0x00 0x40046000 0x00 0x2000 >;
+            #interrupt-cells = <0x03>;
+            compatible = "arm,gic-400";
+            reg = <0x40041000 0x1000 
+                   0x40042000 0x2000 
+                   0x40044000 0x2000 
+                   0x40046000 0x2000>;
+            interrupts = <0x01 0x09 0xf04>;
+            phandle = <0x01>;
         };
+        /*
+        interrupt-controller@ff841000 {
+            interrupt-controller;
+            #interrupt-cells = <0x03>;
+            compatible = "arm,gic-400";
+            reg = <0xff841000 0x1000 
+                   0xff842000 0x2000 
+                   0xff844000 0x2000 
+                   0xff846000 0x2000>;
+            interrupts = <0x01 0x09 0xf04>;
+            phandle = <0x01>;
+        };
+         */
     };
 
     timer {
-        compatible = "arm,armv8-timer", "arm,armv7-timer";
-        always-on;
-        interrupts = < 0x01 0x0d 0x104 0x01 0x0e 0x104 0x01 0x0b 0x104 0x01 0x0a 0x104 >;
+        compatible = "arm,armv8-timer";
+        interrupts = <0x01 0x0d 0xf08 0x01 0x0e 0xf08 0x01 0x0b 0xf08 0x01 0x0a 0xf08>;
+    };
+    
+    pci {
+        compatible = "pci-host-cam-generic";
+        device_type = "pci";
+        reg = <0x01 0x00000000 0x03000000>; // 48MB
+        
+        #address-cells = <0x3>;
+        #size-cells =  <0x2>;
+        #interrupt-cells = <0x1>;
+        bus-range = <0x0 0x1>;
+        dma-coherent;
+        
+        /*
+         * CFG region, 16MB (0x00 0x01000000) @PCI address 0x00000000, @CPU address 0x100000000
+         * I/O region, 64kB (0x00 0x00010000) @PCI address 0x01000000, @CPU address 0x101000000
+         * MEM region, 16MB (0x00 0x01000000) @PCI address 0x02000000, @CPU address 0x102000000
+         */
+        ranges = <0x00000000 0x00 0x00000000 0x01 0x00000000 0x00 0x01000000
+                  0x01000000 0x00 0x01000000 0x01 0x01000000 0x00 0x00010000
+                  0x02000000 0x00 0x02000000 0x01 0x02000000 0x00 0x01000000>;
+
+        interrupt-map = <0x800 0 0 1 0x01 0 143 4>; // Only #INTA, IRQ# 143/8F
+        interrupt-map-mask = <0xf800 0 0 7>;
     };
     
     chosen {
+        linux,initrd-end = <0x00 0x60000000>;
+        linux,initrd-start = <0x00 0x5d000000>;
         stdout-path = "hvc0";
         bootargs = "console=hvc0 root=/dev/ram0 nosmp maxcpus=1 rw debug loglevel=8 pci=nomsi initcall_debug initcall_blacklist=clk_disable_unused";
         linux,stdout-path = "hvc0";
