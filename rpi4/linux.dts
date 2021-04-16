@@ -30,22 +30,25 @@
     cpus {
         #address-cells = <0x01>;
         #size-cells = <0x00>;
-        //enable-method = "brcm,bcm2836-smp";
+        enable-method = "brcm,bcm2836-smp";
         cpu@0 {
             device_type = "cpu";
             compatible = "arm,cortex-a72";
             reg = <0x00>;
-            enable-method = "psci";
+            enable-method = "spin-table";
+            // enable-method = "psci";
             cpu-release-addr = <0x00 0xd8>;
             phandle = <0x20>;
         };
     };
 
-    psci {
-        compatible = "arm,psci-0.2";
-        method = "hvc";
-    };
-
+    /*
+     * psci {
+     *    compatible = "arm,psci-0.2";
+     *    method = "hvc";
+     * };
+     */
+    
     soc {
         compatible = "simple-bus";
         #address-cells = <0x01>;
