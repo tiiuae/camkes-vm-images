@@ -17,6 +17,10 @@
     #address-cells = <0x02>;
     #size-cells = <0x01>;
     interrupt-parent = <0x01>;
+    
+    aliases {
+        serial2 = "/soc/serial@7e201400";
+    };
 
     memory@40000000 {
         device_type = "memory";
@@ -50,6 +54,20 @@
                   0x7c000000 0x00 0xfc000000 0x2000000 
                   0x40000000 0x00 0xff800000 0x800000>;
 
+        /*
+         * interrupt-controller@ff841000 {
+         *     interrupt-controller;
+         *     #interrupt-cells = <0x03>;
+         *     compatible = "arm,gic-400";
+         *     reg = <0xff841000 0x1000 
+         *            0xff842000 0x2000 
+         *            0xff844000 0x2000 
+         *            0xff846000 0x2000>;
+         *     interrupts = <0x01 0x09 0xf04>;
+         *     phandle = <0x01>;
+         * };
+         */
+        
         interrupt-controller@40041000 {
             interrupt-controller;
             #interrupt-cells = <0x03>;
@@ -61,24 +79,41 @@
             interrupts = <0x01 0x09 0xf04>;
             phandle = <0x01>;
         };
-        /*
-        interrupt-controller@ff841000 {
-            interrupt-controller;
-            #interrupt-cells = <0x03>;
-            compatible = "arm,gic-400";
-            reg = <0xff841000 0x1000 
-                   0xff842000 0x2000 
-                   0xff844000 0x2000 
-                   0xff846000 0x2000>;
-            interrupts = <0x01 0x09 0xf04>;
-            phandle = <0x01>;
+        
+        cprman@7e101000 {
+            compatible = "brcm,bcm2711-cprman";
+            #clock-cells = <0x01>;
+            reg = <0x7e101000 0x2000>;
+            clocks = <0x03 0x04 0x00 0x04 0x01 0x04 0x02 0x05 0x00 0x05 0x01 0x05 0x02>;
+            phandle = <0x06>;
         };
-         */
+        
+        serial@7e201400 {
+            compatible = "arm,pl011\0arm,primecell";
+            reg = <0x7e201400 0x200>;
+            interrupts = <0x00 0x79 0x04>;
+            clocks = <0x06 0x13 0x06 0x14>;
+            clock-names = "uartclk\0apb_pclk";
+            arm,primecell-periphid = <0x241011>;
+            status = "okay";
+        };
+
     };
 
     timer {
         compatible = "arm,armv8-timer";
         interrupts = <0x01 0x0d 0xf08 0x01 0x0e 0xf08 0x01 0x0b 0xf08 0x01 0x0a 0xf08>;
+    };
+    
+    clocks {
+
+        clk-osc {
+            compatible = "fixed-clock";
+            #clock-cells = <0x00>;
+            clock-output-names = "osc";
+            clock-frequency = <0x337f980>;
+            phandle = <0x03>;
+        };
     };
     
     pci {
@@ -108,8 +143,8 @@
     chosen {
         linux,initrd-end = <0x00 0x60000000>;
         linux,initrd-start = <0x00 0x5d000000>;
-        stdout-path = "hvc0";
-        bootargs = "console=hvc0 root=/dev/ram0 nosmp maxcpus=1 rw debug loglevel=8 pci=nomsi initcall_debug initcall_blacklist=clk_disable_unused";
-        linux,stdout-path = "hvc0";
+        stdout-path = "serial2:115200n8";
+        bootargs = "console=ttyS2,115200n8 earlyprintk=serial root=/dev/ram0 nosmp maxcpus=1 rw debug loglevel=8 pci=nomsi initcall_debug initcall_blacklist=clk_disable_unused";
+        linux,stdout-path = "serial2:115200n8";
     };
 };
