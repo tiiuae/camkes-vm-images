@@ -130,7 +130,7 @@
         linux,initrd-end = <0x00 0x60000000>;
         linux,initrd-start = <0x00 0x5d000000>;
         stdout-path = "serial2:115200n8";
-        bootargs = "console=ttyS2,115200n8 earlyprintk=serial root=/dev/ram0 nosmp maxcpus=1 rw debug loglevel=8 pci=nomsi initcall_debug initcall_blacklist=clk_disable_unused";
+        bootargs = "console=ttyS2,115200n8 earlyprintk=serial root=/dev/ram0 ramdisk_size=131072 nosmp maxcpus=1 rw debug loglevel=8 pci=nomsi initcall_debug initcall_blacklist=clk_disable_unused";
         linux,stdout-path = "serial2:115200n8";
     };
 };
