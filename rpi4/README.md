@@ -2,14 +2,14 @@
 ## Compilation details:
 ### Linux image
 * File: linux
-* From: https://github.com/raspberrypi/linux
-* Commit hash: 3e55254ce6f792372bbfe90f77006e75467c1dfe (rpi-5.10.y)
+* From: https://github.com/torvalds/linux.git
+* Commit hash: d4961772226de3b48a395a26c076d450d7044c76
 * Config: `linux-config`
 
 ### Buildroot Rootfs image
 * File: rootfs.cpio.gz
 * From: git://git.buildroot.net/buildroot
-* Commit hash: e2fba6457bd9d9c720540332eaf0c1f8c29eab00 (2021.02)
+* Commit hash: 75fa35e1ea787094fed53b9f6f89b11116b32408
 * Config: `buildroot/buildroot-config`
 
 ## Build instructions
