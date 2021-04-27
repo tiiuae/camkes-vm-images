@@ -11,46 +11,54 @@
 /dts-v1/;
 
 / {
-
-    compatible = "raspberrypi,4-model-b\0brcm,bcm2711";
-    model = "Raspberry Pi 4 Model B";
     #address-cells = <0x02>;
+    model = "Raspberry Pi 4 Model B";
     #size-cells = <0x01>;
-    interrupt-parent = <&gicv2>;
-    
-    aliases {
-        serial2 = "/soc/serial@7e201400";
-    };
+    interrupt-parent = <0x01>;
+    compatible = "raspberrypi,4-model-b\0brcm,bcm2711";
 
-    memory@40000000 {
+    memory {
         device_type = "memory";
-        reg = <0x00 0x40000000 0x20000000>; /* 512MB */
+        reg = <0x00 0x40000000 0x20000000>; // 512MB
     };
-
+    
     cpus {
         #address-cells = <0x01>;
         #size-cells = <0x00>;
-        enable-method = "brcm,bcm2836-smp";
+        //enable-method = "brcm,bcm2836-smp";
         cpu@0 {
             device_type = "cpu";
             compatible = "arm,cortex-a72";
             reg = <0x00>;
-            enable-method = "spin-table";
+            // enable-method = "spin-table";
             // enable-method = "psci";
-            cpu-release-addr = <0x00 0xd8>;
+            // cpu-release-addr = <0x00 0xd8>;
         };
     };
 
-    gicv2: interrupt-controller@ff841000 {
-        interrupt-controller;
-        #interrupt-cells = <0x03>;
-        compatible = "arm,gic-400";
-        reg = <0x00 0xff841000 0x1000
-               0x00 0xff842000 0x2000
-               0x00 0xff844000 0x2000
-               0x00 0xff846000 0x2000>;
-        /* TODO: check these interrupts */
-        interrupts = <0x01 0x09 0xf04>;
+    soc {
+        dma-ranges = <0xc0000000 0x00 0x00 0x40000000>;
+        #address-cells = <0x01>;
+        #size-cells = <0x01>;
+        compatible = "simple-bus";
+        ranges = <0x7e000000 0x00 
+                  0xfe000000 0x1800000 
+                  0x7c000000 0x00 
+                  0xfc000000 0x2000000 
+                  0x40000000 0x00 
+                  0xff800000 0x800000>;
+
+        interrupt-controller@40041000 {
+            interrupts = <0x01 0x09 0xf04>;
+            compatible = "arm,gic-400";
+            #interrupt-cells = <0x03>;
+            reg = <0x40041000 0x1000 
+                   0x40042000 0x2000 
+                   0x40044000 0x2000 
+                   0x40046000 0x2000>;
+            phandle = <0x01>;
+            interrupt-controller;
+        };
     };
 
     /*
@@ -59,78 +67,34 @@
      *    method = "hvc";
      * };
      */
-    
-    soc {
-        compatible = "simple-bus";
-        #address-cells = <0x01>;
-        #size-cells = <0x01>;
-        ranges = <0x7e000000 0x00 0xfe000000 0x1800000 
-                  0x7c000000 0x00 0xfc000000 0x2000000 
-                  0x40000000 0x00 0xff800000 0x800000>;
-
-        cprman@7e101000 {
-            compatible = "brcm,bcm2711-cprman";
-            #clock-cells = <0x01>;
-            reg = <0x7e101000 0x2000>;
-            clocks = <0x03 0x04 0x00 0x04 0x01 0x04 0x02 0x05 0x00 0x05 0x01 0x05 0x02>;
-        };
-        
-        serial@7e201400 {
-            compatible = "arm,pl011\0arm,primecell";
-            reg = <0x7e201400 0x200>;
-            interrupts = <0x00 0x79 0x04>;
-            clocks = <0x06 0x13 0x06 0x14>;
-            clock-names = "uartclk\0apb_pclk";
-            arm,primecell-periphid = <0x241011>;
-            status = "okay";
-        };
-
-    };
 
     timer {
+        arm,cpu-registers-not-fw-configured;
         compatible = "arm,armv8-timer";
         interrupts = <0x01 0x0d 0xf08 0x01 0x0e 0xf08 0x01 0x0b 0xf08 0x01 0x0a 0xf08>;
     };
     
-    clocks {
-
-        clk-osc {
-            compatible = "fixed-clock";
-            #clock-cells = <0x00>;
-            clock-output-names = "osc";
-            clock-frequency = <0x337f980>;
-        };
-    };
-    
     pci {
-        compatible = "pci-host-cam-generic";
-        device_type = "pci";
-        reg = <0x01 0x00000000 0x03000000>; // 48MB
-        
-        #address-cells = <0x3>;
-        #size-cells =  <0x2>;
-        #interrupt-cells = <0x1>;
-        bus-range = <0x0 0x1>;
+        #address-cells = <0x03>;
+        #size-cells = <0x02>;
+        #interrupt-cells = <0x01>;
         dma-coherent;
+        bus-range = <0x00 0x01>;
+        device_type = "pci";
+        compatible = "pci-host-cam-generic";
+        ranges = <0x1000000 0x00 0x00 0x00 0xf1000000 0x00 0x10000 0x2000000 0x00 0xf2000000 0x00 0xf2000000 0x00 0x1000000>;
         
-        /*
-         * CFG region, 16MB (0x00 0x01000000) @PCI address 0x00000000, @CPU address 0x100000000
-         * I/O region, 64kB (0x00 0x00010000) @PCI address 0x01000000, @CPU address 0x101000000
-         * MEM region, 16MB (0x00 0x01000000) @PCI address 0x02000000, @CPU address 0x102000000
-         */
-        ranges = <0x00000000 0x00 0x00000000 0x01 0x00000000 0x00 0x01000000
-                  0x01000000 0x00 0x01000000 0x01 0x01000000 0x00 0x00010000
-                  0x02000000 0x00 0x02000000 0x01 0x02000000 0x00 0x01000000>;
-
-        interrupt-map = <0x800 0 0 1 0x01 0 143 4>; // Only #INTA, IRQ# 143/8F
-        interrupt-map-mask = <0xf800 0 0 7>;
+        reg = <0x00 0xf0000000 0x1000000>;
+        
+        interrupt-map = <0x800 0x00 0x00 0x01 0x01 0x00 0x28 0x04>;
+        interrupt-map-mask = <0xf800 0x00 0x00 0x07>;
     };
     
     chosen {
-        linux,initrd-end = <0x00 0x60000000>;
+        linux,initrd-end = <0x00 0x5d5b50f9>;
         linux,initrd-start = <0x00 0x5d000000>;
-        stdout-path = "serial2:115200n8";
-        bootargs = "console=ttyS2,115200n8 earlyprintk=serial root=/dev/ram0 ramdisk_size=131072 nosmp maxcpus=1 rw debug loglevel=8 pci=nomsi initcall_debug initcall_blacklist=clk_disable_unused";
-        linux,stdout-path = "serial2:115200n8";
+        stdout-path = "hvc0";
+        bootargs = "console=hvc0 earlyprintk root=/dev/ram0 ramdisk_size=131072 nosmp rw debug loglevel=7 pci=nomsi initcall_debug";
+        linux,stdout-path = "hvc0";
     };
 };
