@@ -22,18 +22,47 @@
         reg = <0x00 0x40000000 0x20000000>; // 512MB
     };
     
+    psci {
+        compatible = "arm,psci-1.0";
+        method = "smc";
+        cpu_off = <0x84000002>;
+        cpu_on = <0xc4000003>;
+        cpu_suspend = <0xc4000001>;
+        status = "okay";
+    };
+    
     cpus {
         #address-cells = <0x01>;
         #size-cells = <0x00>;
-        //enable-method = "brcm,bcm2836-smp";
+        
         cpu@0 {
             device_type = "cpu";
             compatible = "arm,cortex-a72";
             reg = <0x00>;
-            // enable-method = "spin-table";
-            // enable-method = "psci";
-            // cpu-release-addr = <0x00 0xd8>;
+            enable-method = "psci";
         };
+        /*
+        cpu@1 {
+            device_type = "cpu";
+            compatible = "arm,cortex-a72";
+            reg = <0x01>;
+            enable-method = "psci";
+        };
+        
+        cpu@2 {
+            device_type = "cpu";
+            compatible = "arm,cortex-a72";
+            reg = <0x02>;
+            enable-method = "psci";
+        };
+        
+        cpu@3 {
+            device_type = "cpu";
+            compatible = "arm,cortex-a72";
+            reg = <0x03>;
+            enable-method = "psci";
+        };
+        */
     };
 
     soc {
