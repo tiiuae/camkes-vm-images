@@ -48,7 +48,6 @@
             reg = <0x01>;
             enable-method = "psci";
         };
-        
         cpu@2 {
             device_type = "cpu";
             compatible = "arm,cortex-a72";
@@ -90,13 +89,6 @@
         };
     };
 
-    /*
-     * psci {
-     *    compatible = "arm,psci-0.2";
-     *    method = "hvc";
-     * };
-     */
-
     timer {
         arm,cpu-registers-not-fw-configured;
         compatible = "arm,armv8-timer";
@@ -111,9 +103,10 @@
         bus-range = <0x00 0x01>;
         device_type = "pci";
         compatible = "pci-host-cam-generic";
-        ranges = <0x1000000 0x00 0x00 0x00 0xf1000000 0x00 0x10000 0x2000000 0x00 0xf2000000 0x00 0xf2000000 0x00 0x1000000>;
+        ranges = <0x1000000 0x00       0x00 0x01 0x01000000 0x00 0x10000
+                  0x2000000 0x00 0xf2000000 0x01 0x02000000 0x00 0x1000000>;
         
-        reg = <0x00 0xf0000000 0x1000000>;
+        reg = <0x01 0x00000000 0x1000000>;
         
         interrupt-map = <0x800 0x00 0x00 0x01 0x01 0x00 0x28 0x04>;
         interrupt-map-mask = <0xf800 0x00 0x00 0x07>;
@@ -123,7 +116,7 @@
         linux,initrd-end = <0x00 0x5d5b50f9>;
         linux,initrd-start = <0x00 0x5d000000>;
         stdout-path = "hvc0";
-        bootargs = "console=hvc0 earlyprintk root=/dev/ram0 ramdisk_size=131072 nosmp rw debug loglevel=7 pci=nomsi initcall_debug";
+        bootargs = "console=hvc0 earlyprintk root=/dev/ram0 rw nosmp debug loglevel=7 pci=nomsi initcall_debug";
         linux,stdout-path = "hvc0";
     };
 };
