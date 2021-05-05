@@ -41,7 +41,6 @@
             reg = <0x00>;
             enable-method = "psci";
         };
-        /*
         cpu@1 {
             device_type = "cpu";
             compatible = "arm,cortex-a72";
@@ -61,7 +60,6 @@
             reg = <0x03>;
             enable-method = "psci";
         };
-        */
     };
 
     soc {
@@ -103,8 +101,8 @@
         bus-range = <0x00 0x01>;
         device_type = "pci";
         compatible = "pci-host-cam-generic";
-        ranges = <0x1000000 0x00       0x00 0x01 0x01000000 0x00 0x10000
-                  0x2000000 0x00 0xf2000000 0x01 0x02000000 0x00 0x1000000>;
+        ranges = <0x01000000 0x00 0x01000000 0x01 0x01000000 0x00 0x10000
+                  0x02000000 0x00 0x02000000 0x01 0x02000000 0x00 0x1000000>;
         
         reg = <0x01 0x00000000 0x1000000>;
         
